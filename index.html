@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>JsTemp demo</title>
+</head>
+
+<body>
+    <table>
+        <tr>
+            <td>用户名：</td>
+            <td><input id="userName" placeholder="请输入用户名" data-valid="required-{用户名不能为空},length.{0}.{5}-{用户名只能输入5个字符}"></td>
+            <!-- -{用户名不能为空} 是验证不通过时的提示内容-->
+        </tr>
+        <tr>
+            <td>手机号码：</td>
+            <td><input id="txtTel" placeholder="请输入手机号码" data-property="手机号码,{0}不能为空,{0}格式不正确,{0}必须为{1}个数字,11,tel"
+                    data-valid="0-0.1.0,1.4.4-0.3.0.4,2.5-0.2.0">
+                <!--压缩的写法方式，在字符太多的情况下可以减少长度，一般不建议用-->
+            </td>
+        </tr>
+        <tr>
+            <td>邮箱：</td>
+            <td><input id="txtEmail" placeholder="请输入邮箱地址" data-valid="required,regexp.{email}-{邮箱格式不正确}">
+            </td>
+        </tr>
+        <tr>
+            <td>购买日期：</td>
+            <td><input id="txtDate" placeholder="请输入购买日期" data-valid="required,regexp.{date}-{购买日期不正确}">
+            </td>
+        </tr>
+        <tr>
+            <td>密码：</td>
+            <td><input id="txtPwd" placeholder="请输入密码" data-valid="required">
+                <!-- required默认的提示会取placeholder的值-->
+            </td>
+        </tr>
+        <tr>
+            <td>密码：</td>
+            <td><input id="txtPwd2" placeholder="请再次输入密码" data-valid="required,equalTo.{#txtPwd}-{两次输入密码不正确}">
+            </td>
+        </tr>
+        <tr>
+            <td>性别：</td>
+            <td><input id="txtSex" placeholder="请输入性别" data-valid="required,external.{testSex}-{输入的性别有误}">
+            </td>
+        </tr>
+        <tr>
+            <td>专业语言：</td>
+            <td><input id="txtSex" placeholder="请输入专业语言" data-valid="required,external.{testProfess}">
+                <!-- external是采用外部方法验证的方式，testProfess是外部方法的名称，用这种方式可以做到很灵活 -->
+            </td>
+        </tr>
+        <input type="button" onclick="checkForm();" value="验证输入" />
+    </table>
+</body>
+<script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="ValidUtil.js"></script>
+<script type="text/javascript">
+    console.log(valid.core.getDeclareDes()); //验证规则关键字
+
+    function checkForm() {
+
+        var rs = valid.util.checkInputs();
+        if (rs.isTrue) {
+            alert("验证通过");
+        } else {
+            alert(rs.msg);
+        }
+    }
+
+    function testSex(element, params) {
+        var rs = valid.core.result();
+        var sex = ['男', '女'];
+        return sex.indexOf(element.value) > -1;
+    }
+
+    function testProfess(element, params) {
+        var rs = valid.core.result();
+        var arr = ["c#", "java", "javascript", "C++", "pation", "c"];
+        if (arr.indexOf(element.value.toLowerCase()) == -1) {
+            rs.isTrue = false;
+            rs.msg = "您的专业语言不在此范围内";
+        }
+        return rs;
+    }
+</script>
+
+</html>
