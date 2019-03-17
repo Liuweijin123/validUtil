@@ -52,13 +52,40 @@
                 <!-- external是采用外部方法验证的方式，testProfess是外部方法的名称，用这种方式可以做到很灵活 -->
             </td>
         </tr>
+        <tr>
+            <td>兴趣爱好：</td>
+            <td><input id="txtSex" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你喜欢什么？">
+            </td>
+        </tr>
         <input type="button" onclick="checkForm();" value="验证输入" />
     </table>
 </body>
 <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="ValidUtil.js"></script>
 <script type="text/javascript">
+    valid.core.attachRules({
+        name: "not_empty",
+        check: function (element, params) {
+            if (!element.value)
+                return false;
+            return true;
+        },
+        des: "自定义非空验证"
+    });
+    valid.core.attachMsgSender({
+        name: "myMsg",
+        warn: function (element, params) {
+            var msg = params[0];
+            return msg;
+        },
+        des: "自定义提醒消息"
+    });
     console.log(valid.core.getDeclareDes()); //验证规则关键字
+    valid.core.config({
+        regular: {
+            tel: /^1(3[0-9]|4[57]|5[0-35-9]|8[0-9]|99|7[0-9])\d{8}$/, //配置regexp验证的正则表达式，此方式可以扩展或替换自带的正则验证规则
+        }
+    });
 
     function checkForm() {
 

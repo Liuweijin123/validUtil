@@ -1,147 +1,176 @@
+//兼容低版本浏览器
+if (typeof Object.assign != 'function') {
+	Object.assign = function (target) {
+		'use strict';
+		if (target == null) {
+			throw new TypeError('Cannot convert undefined or null to object');
+		}
+
+		target = Object(target);
+		for (var index = 1; index < arguments.length; index++) {
+			var source = arguments[index];
+			if (source != null) {
+				for (var key in source) {
+					if (Object.prototype.hasOwnProperty.call(source, key)) {
+						target[key] = source[key];
+					}
+				}
+			}
+		}
+		return target;
+	};
+}
+
 /**
  * 表单验证
  */
 var valid = {};
 (function (valid, doc) {
 	//class validCoreCls{
-	function validCoreCls (){
+	function validCoreCls() {
 		//constructor() {
-			var _guarders = [];
-			var _sayers = [];
-			var _configs = {};
-			this.getGuarder = function (indexOrName) {
-				for (var i = 0; i < _guarders.length; i++) {
-					if (i == indexOrName || _guarders[i].name == indexOrName) {
-						return _guarders[i];
-					}
+		var _rules = [];
+		var _msgSender = [];
+		var _configs = {};
+		this.getRules = function (indexOrName) {
+			for (var i = 0; i < _rules.length; i++) {
+				if (i == indexOrName || _rules[i].name == indexOrName) {
+					return _rules[i];
 				}
-				return this;
-			};
-			this.attachGuarder = function (guarder) {
-				for (var i = 0; i < _guarders.length; i++) {
-					if (guarder.index === i) {
-						_guarders[0] = guarder;
-						return;
-					}
-				}
-				_guarders.push(guarder);
-				return this;
-			};
-			this.getSayer = function (indexOrName) {
-				for (var i = 0; i < _sayers.length; i++) {
-					if (i == indexOrName || _sayers[i].name == indexOrName) {
-						return _sayers[i];
-					}
-				}
-			};
-			this.attachSayer = function (sayer) {
-				for (var i = 0; i < _sayers.length; i++) {
-					if (sayer.index === i) {
-						_sayers[0] = sayer;
-						return;
-					}
-				}
-				_sayers.push(sayer);
-				return this;
-			};
-			this.result = function () {
-				return {
-					isTrue: true,
-					msg: undefined
-				};
-			};
-			this.getConfig = function (config_name) {
-				return _configs[config_name];
-			};
-			this.config = function (config_obj) {
-				_configs = config_obj;
-			};
-			this.getDeclareDes = function () {
-				var str = "";
-				for (var i = 0; i < _guarders.length; i++) {
-					str += ","+_guarders[i].index;
-					str += "-" + _guarders[i].name;
-					str += "-" + _guarders[i].des+"\n";
-				}
-				return str.substring(1);
 			}
+			return this;
+		};
+		this.attachRules = function (rules) {
+			for (var i = 0; i < _rules.length; i++) {
+				if (rules.index === i) {
+					_rules[0] = rules;
+					return;
+				}
+			}
+			_rules.push(rules);
+			return this;
+		};
+		this.getMsgSender = function (indexOrName) {
+			for (var i = 0; i < _msgSender.length; i++) {
+				if (i == indexOrName || _msgSender[i].name == indexOrName) {
+					return _msgSender[i];
+				}
+			}
+		};
+		this.attachMsgSender = function (msgSender) {
+			for (var i = 0; i < _msgSender.length; i++) {
+				if (msgSender.index === i||msgSender.name===_msgSender[0].name) {
+					_msgSender[0] = msgSender;
+					return;
+				}
+			}
+			_msgSender.push(msgSender);
+			return this;
+		};
+		this.result = function () {
+			return {
+				isTrue: true,
+				msg: undefined
+			};
+		};
+		this.getConfig = function (config_name) {
+			return _configs[config_name];
+		};
+		this.config = function (config_obj) {
+			for (var p in config_obj) {
+				if (!_configs[p]) {
+					_configs[p] = {};
+				}
+				Object.assign(_configs[p], config_obj[p]);
+			}
+			//_configs = config_obj;
+		};
+		this.getDeclareDes = function () {
+			var str = "";
+			for (var i = 0; i < _rules.length; i++) {
+				str += "," + _rules[i].index;
+				str += "-" + _rules[i].name;
+				str += "-" + _rules[i].des + "\n";
+			}
+			return str.substring(1);
+		}
 		//}
 	}
 	validCore = new validCoreCls();
 
-	function validUtilCls (){
+	function validUtilCls() {
 		//constructor() {
-			this.getParam = function (sVal, fGet) {
-				if (/^\{.*\}$/.test(sVal)) {
-					return sVal.replace("{", "").replace("}", "");
-				}
-				if (fGet) {
-					return fGet(sVal);
-				}
-				return sVal;
-			};
-			this.checkOne = function (element) {
-				var rs = valid.core.result();
-				var strEx = element.getAttribute("data-valid");
-				var arr = strEx.split(",");
-				for (var i = 0; i < arr.length; i++) {
-					rs = valid.util.checkInput(element, arr[i]);
-					if (!rs.isTrue)
-						break;
-				}
-				return rs;
-			};
-			this.checkInput = function (element, strEx) {
-				var rs = validCore.result();
-				var arr = strEx.split("-");
-				var vlArr = arr[0].split(".");
-				var guarder = valid.core.getGuarder(vlArr[0]);
-				if (guarder) {
-					guarder = Object.assign({}, guarder);
-					if (guarder.check) {
-						var ckRs = guarder.check(element, vlArr.slice(1));
-						if (!(ckRs instanceof Object))
-							rs.isTrue = ckRs;
-						else {
-							rs.isTrue = ckRs.isTrue;
-							rs.msg = ckRs.msg;
-						}
+		this.getParam = function (sVal, fGet) {
+			if (/^\{.*\}$/.test(sVal)) {
+				return sVal.replace("{", "").replace("}", "");
+			}
+			if (fGet) {
+				return fGet(sVal);
+			}
+			return sVal;
+		};
+		this.checkOne = function (element) {
+			var rs = valid.core.result();
+			var strEx = element.getAttribute("data-valid");
+			var arr = strEx.split(",");
+			for (var i = 0; i < arr.length; i++) {
+				rs = valid.util.checkInput(element, arr[i]);
+				if (!rs.isTrue)
+					break;
+			}
+			return rs;
+		};
+		this.checkInput = function (element, strEx) {
+			var rs = validCore.result();
+			var arr = strEx.split("-");
+			var vlArr = arr[0].split(".");
+			var rule = valid.core.getRules(vlArr[0]);
+			if (rule) {
+				rule = Object.assign({}, rule);
+				if (rule.check) {
+					var ckRs = rule.check(element, vlArr.slice(1));
+					if (!(ckRs instanceof Object))
+						rs.isTrue = ckRs;
+					else {
+						rs.isTrue = ckRs.isTrue;
+						rs.msg = ckRs.msg;
 					}
 				}
-				if (!rs.isTrue) {
-					var msArr = [0];
-					if (arr[1]) {
-						msArr = arr[1].split(".");
-					}
-					var sayer = Object.assign({}, validCore.getSayer(0));
-					sayer.source = rs.msg;
-					var params = [];
-					if (msArr[0]) {
-						sayer.source = msArr[0];
-						if (validCore.getSayer(msArr[0])) {
-							sayer = Object.assign({}, validCore.getSayer(msArr[0]));
-						}
-						params = msArr.slice(1);
-					}
-					rs.msg = sayer.say(element, params);
+			}
+			if (!rs.isTrue) {
+				var msArr = [0];
+				if (arr[1]) {
+					msArr = arr[1].split(".");
 				}
-				return rs;
-			};
-			this.checkInputs = function () {
-				var rs = validCore.result();
-				var $inputs = $("input[data-valid]");
-				for (var i = 0; i < $inputs.length; i++) {
-					rs = valid.util.checkOne($inputs[i]);
-					if (!rs.isTrue)
-						break;
+				var msgSender = Object.assign({}, validCore.getMsgSender(0));
+				msgSender.extObj = rs.msg;
+				var params = [];
+				if (msArr[0]) {
+					msgSender.extObj = msArr[0];
+					if (validCore.getMsgSender(msArr[0])) {
+						msgSender = Object.assign({}, validCore.getMsgSender(msArr[0]));
+					}
+					params = msArr.slice(1);
 				}
-				return rs;
-			};
-	//	}
+				rs.msg = msgSender.warn(element, params);
+			}
+			return rs;
+		};
+		this.checkInputs = function () {
+			var rs = validCore.result();
+			var $inputs = $("input[data-valid]");
+			for (var i = 0; i < $inputs.length; i++) {
+				rs = valid.util.checkOne($inputs[i]);
+				if (!rs.isTrue)
+					break;
+			}
+			return rs;
+		};
+		//	}
 	}
 	validUtil = new validUtilCls();
 
-	validCore.attachGuarder({
+	validCore.attachRules({
 			index: 0,
 			name: "required",
 			check: function (element, params) {
@@ -151,7 +180,7 @@ var valid = {};
 			},
 			des: "验证非空，格式 (0|request)[-{message}]"
 		})
-		.attachGuarder({
+		.attachRules({
 			index: 1,
 			name: "length",
 			check: function (element, params) {
@@ -174,12 +203,12 @@ var valid = {};
 				}
 				return true;
 			},
-			getDefMsg:function (element, params) {
-				
+			getDefMsg: function (element, params) {
+
 			},
 			des: "输入长度验证，格式 (1|length).({$min}.{$max})[-{message}]"
 		})
-		.attachGuarder({
+		.attachRules({
 			index: 2,
 			name: "regexp",
 			check: function (element, params) {
@@ -203,7 +232,7 @@ var valid = {};
 			},
 			des: "正则表达式验证，格式：(2|regexp).{regexpType}[.{regexpType}] "
 		})
-		.attachGuarder({
+		.attachRules({
 			index: 3,
 			name: "equalTo",
 			check: function (element, params) {
@@ -225,7 +254,7 @@ var valid = {};
 			},
 			des: "判断输入值必须和 #field 相同，格式：(3|equalTo).{#field}[-{message}]"
 		})
-		.attachGuarder({
+		.attachRules({
 			index: 4,
 			name: "external",
 			check: function (element, params) {
@@ -247,15 +276,15 @@ var valid = {};
 			des: "调用外部方法进行验证，格式：(4.external).{funcName}[-{message}]"
 		});
 
-	validCore.attachSayer({
-		source: "",
+	validCore.attachMsgSender({
+		extObj: "",
 		index: 0,
 		name: "default",
-		say: function (element, params) {
+		warn: function (element, params) {
 			var msg = element.getAttribute("id") + "验证不通过";
 			if (!params || params.length == 0) {
-				if (this.source)
-					msg = valid.util.getParam(this.source);
+				if (this.extObj)
+					msg = valid.util.getParam(this.extObj);
 				else if (element.getAttribute("placeholder"))
 					msg = element.getAttribute("placeholder");
 			} else {
@@ -268,7 +297,7 @@ var valid = {};
 						return prr[idx]
 					})
 					if (/\{0\}/.test(msg)) {
-						var value = validUtil.getParam(this.source, function (idx) {
+						var value = validUtil.getParam(this.extObj, function (idx) {
 							return prr[idx]
 						})
 						msg = msg.replace("{0}", value);
@@ -329,26 +358,3 @@ var valid = {};
 	valid.core = validCore;
 	valid.util = validUtil;
 })(valid, this);
-
-if (typeof Object.assign != 'function') {
-	Object.assign = function(target) {
-	  'use strict';
-	  if (target == null) {
-		throw new TypeError('Cannot convert undefined or null to object');
-	  }
-   
-	  target = Object(target);
-	  for (var index = 1; index < arguments.length; index++) {
-		var source = arguments[index];
-		if (source != null) {
-		  for (var key in source) {
-			if (Object.prototype.hasOwnProperty.call(source, key)) {
-			  target[key] = source[key];
-			}
-		  }
-		}
-	  }
-	  return target;
-	};
-  }
-  Object.assign(window, view);
