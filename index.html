@@ -48,13 +48,13 @@
         </tr>
         <tr>
             <td>专业语言：</td>
-            <td><input id="txtSex" placeholder="请输入专业语言" data-valid="required,external.{testProfess}">
+            <td><input id="txtProcess" placeholder="请输入专业语言" data-valid="required,external.{testProfess}">
                 <!-- external是采用外部方法验证的方式，testProfess是外部方法的名称，用这种方式可以做到很灵活 -->
             </td>
         </tr>
         <tr>
             <td>兴趣爱好：</td>
-            <td><input id="txtSex" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你喜欢什么？">
+            <td><input id="txtInterest" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你.喜欢.什么？"><span style="color:red"></span>
             </td>
         </tr>
         <input type="button" onclick="checkForm();" value="验证输入" />
@@ -75,7 +75,8 @@
     valid.core.attachMsgSender({
         name: "myMsg",
         warn: function (element, params) {
-            var msg = params[0];
+            var msg = params[0]+params[1]+params[2];
+            $("#"+element.id).parent().find("span").html(msg);
             return msg;
         },
         des: "自定义提醒消息"
@@ -88,7 +89,7 @@
     });
 
     function checkForm() {
-
+        $("span[style='color:red']").html("");
         var rs = valid.util.checkInputs();
         if (rs.isTrue) {
             alert("验证通过");
