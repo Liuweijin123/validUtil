@@ -9,52 +9,52 @@
 <body>
     <table>
         <tr>
-            <td>用户名：</td>
+            <td><span style="color:red">*</span>用户名：</td>
             <td><input id="userName" placeholder="请输入用户名" data-valid="required-{用户名不能为空},length.{0}.{5}-{用户名只能输入5个字符}"></td>
             <!-- -{用户名不能为空} 是验证不通过时的提示内容-->
         </tr>
         <tr>
-            <td>手机号码：</td>
+            <td><span style="color:red">*</span>手机号码：</td>
             <td><input id="txtTel" placeholder="请输入手机号码" data-property="手机号码,{0}不能为空,{0}格式不正确,{0}必须为{1}个数字,11,tel"
                     data-valid="0-0.1.0,1.4.4-0.3.0.4,2.5-0.2.0">
                 <!--压缩的写法方式，在字符太多的情况下可以减少长度，一般不建议用-->
             </td>
         </tr>
         <tr>
-            <td>邮箱：</td>
+            <td><span style="color:red">*</span>邮箱：</td>
             <td><input id="txtEmail" placeholder="请输入邮箱地址" data-valid="required,regexp.{email}-{邮箱格式不正确}">
             </td>
         </tr>
         <tr>
-            <td>购买日期：</td>
-            <td><input id="txtDate" placeholder="请输入购买日期" data-valid="required,regexp.{date}-{购买日期不正确}">
+            <td>填表日期：</td>
+            <td><input id="txtDate" placeholder="请输入填表日期" data-valid="regexp.{date}-{填表日期不正确}">
             </td>
         </tr>
         <tr>
-            <td>密码：</td>
+            <td><span style="color:red">*</span>密码：</td>
             <td><input id="txtPwd" placeholder="请输入密码" data-valid="required">
                 <!-- required默认的提示会取placeholder的值-->
             </td>
         </tr>
         <tr>
-            <td>密码：</td>
+            <td><span style="color:red">*</span>密码确认：</td>
             <td><input id="txtPwd2" placeholder="请再次输入密码" data-valid="required,equalTo.{#txtPwd}-{两次输入密码不正确}">
             </td>
         </tr>
         <tr>
-            <td>性别：</td>
+            <td><span style="color:red">*</span>性别：</td>
             <td><input id="txtSex" placeholder="请输入性别" data-valid="required,external.{testSex}-{输入的性别有误}">
             </td>
         </tr>
         <tr>
-            <td>专业语言：</td>
+            <td><span style="color:red">*</span>专业语言：</td>
             <td><input id="txtProcess" placeholder="请输入专业语言" data-valid="required,external.{testProfess}">
                 <!-- external是采用外部方法验证的方式，testProfess是外部方法的名称，用这种方式可以做到很灵活 -->
             </td>
         </tr>
         <tr>
-            <td>兴趣爱好：</td>
-            <td><input id="txtInterest" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你.喜欢.什么？"><span style="color:red"></span>
+            <td><span style="color:red">*</span>兴趣爱好：</td>
+            <td><input id="txtInterest" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你.喜欢.什么？"><span class="tip" style="color:red"></span>
             </td>
         </tr>
         <input type="button" onclick="checkForm();" value="验证输入" />
@@ -89,7 +89,7 @@
     });
 
     function checkForm() {
-        $("span[style='color:red']").html("");
+        $(".tip").html("");
         var rs = valid.util.checkInputs();
         if (rs.isTrue) {
             alert("验证通过");

@@ -184,7 +184,7 @@ var valid = {};
 			index: 1,
 			name: "length",
 			check: function (element, params) {
-				if (params && element.value != undefined) {
+				if (params && element.value != undefined && element.value!=="") {
 					var prr = [];
 					if (element.getAttribute("data-property")) {
 						var prr = element.getAttribute("data-property").split(",");
@@ -212,7 +212,7 @@ var valid = {};
 			index: 2,
 			name: "regexp",
 			check: function (element, params) {
-				if (params && element.value != undefined) {
+				if (params && element.value != undefined && element.value!=="") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
@@ -236,7 +236,7 @@ var valid = {};
 			index: 3,
 			name: "equalTo",
 			check: function (element, params) {
-				if (params && element.value != undefined) {
+				if (params && element.value != undefined && element.value!=="") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
@@ -258,7 +258,7 @@ var valid = {};
 			index: 4,
 			name: "external",
 			check: function (element, params) {
-				if (params && element.value != undefined) {
+				if (params && element.value != undefined && element.value!=="") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
