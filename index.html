@@ -23,6 +23,7 @@
         <tr>
             <td><span style="color:red">*</span>邮箱：</td>
             <td><input id="txtEmail" placeholder="请输入邮箱地址" data-valid="required,regexp.{email}-{邮箱格式不正确}">
+                <!-- {email} 是参数 通过{}括起来表示该参数的内容是"email"-->
             </td>
         </tr>
         <tr>
@@ -55,6 +56,7 @@
         <tr>
             <td><span style="color:red">*</span>兴趣爱好：</td>
             <td><input id="txtInterest" placeholder="请输入兴趣爱好" data-valid="not_empty-myMsg.你.喜欢.什么？"><span class="tip" style="color:red"></span>
+                <!-- 多个参数可以用"."号隔开，你.喜欢.什么？ 表示 参数0=你，参数1=喜欢，参数2=什么？-->
             </td>
         </tr>
         <input type="button" onclick="checkForm();" value="验证输入" />
