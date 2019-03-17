@@ -59,7 +59,7 @@ var valid = {};
 		};
 		this.attachMsgSender = function (msgSender) {
 			for (var i = 0; i < _msgSender.length; i++) {
-				if (msgSender.index === i||msgSender.name===_msgSender[0].name) {
+				if (msgSender.index === i || msgSender.name === _msgSender[0].name) {
 					_msgSender[0] = msgSender;
 					return;
 				}
@@ -123,12 +123,12 @@ var valid = {};
 		this.checkInput = function (element, strEx) {
 			var rs = validCore.result();
 			var arr = strEx.split("-");
-			var vlArr = arr[0].split(".");
-			var rule = valid.core.getRules(vlArr[0]);
+			var ruleParams = arr[0].split(".");
+			var rule = valid.core.getRules(ruleParams[0]);
 			if (rule) {
 				rule = Object.assign({}, rule);
 				if (rule.check) {
-					var ckRs = rule.check(element, vlArr.slice(1));
+					var ckRs = rule.check(element, ruleParams.slice(1));
 					if (!(ckRs instanceof Object))
 						rs.isTrue = ckRs;
 					else {
@@ -143,6 +143,8 @@ var valid = {};
 					msArr = arr[1].split(".");
 				}
 				var msgSender = Object.assign({}, validCore.getMsgSender(0));
+				if (rule.getDefMsg)
+					msgSender.defMsg = rule.getDefMsg(element, ruleParams.slice(1));
 				msgSender.extObj = rs.msg;
 				var params = [];
 				if (msArr[0]) {
@@ -178,13 +180,18 @@ var valid = {};
 					return false;
 				return true;
 			},
-			des: "验证非空，格式 (0|request)[-{message}]"
+			des: "验证非空，格式 (0|request)[-{message}]",
+			getDefMsg: function (element, params) {
+				if (element.getAttribute("placeholder"))
+					return element.getAttribute("placeholder");
+				return element.id + "不能为空";
+			}
 		})
 		.attachRules({
 			index: 1,
 			name: "length",
 			check: function (element, params) {
-				if (params && element.value != undefined && element.value!=="") {
+				if (params && element.value != undefined && element.value !== "") {
 					var prr = [];
 					if (element.getAttribute("data-property")) {
 						var prr = element.getAttribute("data-property").split(",");
@@ -196,23 +203,33 @@ var valid = {};
 						return prr[idx]
 					});
 
-					if (min && !(element.value.length >= min))
+					if (min && !(element.value.length >= min) && min > 0)
 						return false;
-					if (max && !(element.value.length <= max))
+					if (max && !(element.value.length <= max) && max > 0)
 						return false;
 				}
 				return true;
 			},
 			getDefMsg: function (element, params) {
-
+				var min = valid.util.getParam(params[0], function (idx) {
+					return prr[idx]
+				});
+				if (min < 0)
+					min = ""
+				var max = valid.util.getParam(params[1], function (idx) {
+					return prr[idx]
+				});
+				if (max < 0)
+					max = "";
+				return element.getAttribute("id") + "字符数必须为[" + min + "," + max + "]之间";
 			},
-			des: "输入长度验证，格式 (1|length).({$min}.{$max})[-{message}]"
+			des: "输入长度验证，格式 (1|length).({min}.{max})[-{message}]"
 		})
 		.attachRules({
 			index: 2,
 			name: "regexp",
 			check: function (element, params) {
-				if (params && element.value != undefined && element.value!=="") {
+				if (params && element.value != undefined && element.value !== "") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
@@ -220,7 +237,7 @@ var valid = {};
 						var rgKey = valid.util.getParam(params[i], function (idx) {
 							return prr[idx]
 						});
-						var rg = valid.core.getConfig('regular')[rgKey];
+						var rg = valid.core.getConfig('regexp')[rgKey];
 						if (rg) {
 							if (!rg.test(element.value)) {
 								return false;
@@ -230,13 +247,16 @@ var valid = {};
 				}
 				return true;
 			},
+			getDefMsg: function (element, params) {
+				return element.getAttribute("id") + "格式不正确";
+			},
 			des: "正则表达式验证，格式：(2|regexp).{regexpType}[.{regexpType}] "
 		})
 		.attachRules({
 			index: 3,
 			name: "equalTo",
 			check: function (element, params) {
-				if (params && element.value != undefined && element.value!=="") {
+				if (params && element.value != undefined && element.value !== "") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
@@ -252,13 +272,19 @@ var valid = {};
 				}
 				return true;
 			},
+			getDefMsg: function (element, params) {
+				var toVal = valid.util.getParam(params[0], function (idx) {
+					return prr[idx]
+				});
+				return element.getAttribute("id") + "输入的值必须和" + toVal.substring(1) + "一样";
+			},
 			des: "判断输入值必须和 #field 相同，格式：(3|equalTo).{#field}[-{message}]"
 		})
 		.attachRules({
 			index: 4,
 			name: "external",
 			check: function (element, params) {
-				if (params && element.value != undefined && element.value!=="") {
+				if (params && element.value != undefined && element.value !== "") {
 					var prr = [];
 					if (element.getAttribute("data-property"))
 						var prr = element.getAttribute("data-property").split(",");
@@ -273,11 +299,13 @@ var valid = {};
 				}
 				return true;
 			},
+			getDefMsg: function (element, params) {},
 			des: "调用外部方法进行验证，格式：(4.external).{funcName}[-{message}]"
 		});
 
 	validCore.attachMsgSender({
 		extObj: "",
+		defMsg: "",
 		index: 0,
 		name: "default",
 		warn: function (element, params) {
@@ -285,8 +313,8 @@ var valid = {};
 			if (!params || params.length == 0) {
 				if (this.extObj)
 					msg = valid.util.getParam(this.extObj);
-				else if (element.getAttribute("placeholder"))
-					msg = element.getAttribute("placeholder");
+				else if (this.defMsg)
+					msg = this.defMsg;
 			} else {
 				var prr = [];
 				if (element.getAttribute("data-property")) {
@@ -321,7 +349,7 @@ var valid = {};
 	});
 
 	validCore.config({
-		regular: {
+		regexp: {
 			tel: /^1(3[0-9]|4[57]|5[0-35-9]|8[0-9]|99|7[0-9])\d{8}$/, //手机号码
 			phone: /^(0[0-9]{2,3}\-)?([2-9][0-9]{6,7})+(\-[0-9]{1,4})?$/, //电话号码
 			telOrPhone: { //手机或电话号码
